@@ -1,11 +1,12 @@
 import React from 'react';
-// import Login from './src/view/loginPage';
 import Navigation from './src/component/navigation';
+import {AuthProvider} from './src/context/authContext';
 
 const App = () => {
   return (
-    // <Login />
-    <Navigation />
+    <AuthProvider>
+      <Navigation />
+    </AuthProvider>
   );
 };
 

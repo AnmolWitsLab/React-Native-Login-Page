@@ -6,16 +6,16 @@ import {
   Button,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
+import {AuthContext} from '../context/authContext';
 
 const LoginPage = ({navigation}) => {
   const getDataUsingGet = () => {
-    fetch('https://sql-dev-india.thewitslab.com:3003/auth/login', {
+    fetch('https://reqres.in/api/users?page=2', {
       method: 'GET',
     })
       .then(response => response.json())
       .then(responseJson => {
-        alert(JSON.stringify(responseJson));
         console.log(responseJson);
       })
       .catch(error => {
@@ -24,18 +24,33 @@ const LoginPage = ({navigation}) => {
       });
   };
 
-  const [email, setEmail] = useState(null);
+  const validEmail = new RegExp(
+    '^[a-zA-Z0-9._:$!%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]$',
+  );
+  const validPassword = new RegExp('^(?=.*?[A-Za-z])(?=.*?[0-9]).{6,}$');
+
+  const handleSubmit = () => {
+    if (validEmail.test(email) && validPassword.test(password)) {
+      navigation.navigate('Home');
+    } else {
+      alert('Invalid Email or Password');
+    }
+  };
+
+  const val = useContext(AuthContext);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState(null);
   return (
     <View style={styles.mainContainer}>
       <View style={styles.wrapper}>
+        <Text>{val}</Text>
         <TextInput
           style={styles.input}
           value={email}
           placeholder="Enter Your Email"
           autoCapitalize="none"
           autoCorrect={false}
-          onChangeText={text => setEmail(text)}
+          onChangeText={e => setEmail(e)}
         />
         <TextInput
           style={styles.input}
@@ -44,18 +59,20 @@ const LoginPage = ({navigation}) => {
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry={true}
-          onChangeText={text => setPassword(text)}
+          onChangeText={e => setPassword(e)}
         />
+
         <Button
           title="Login"
           onPress={() => {
             getDataUsingGet();
+            handleSubmit();
           }}
         />
         <View style={styles.wrapperText}>
           <Text>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.link}>Register</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+            <Text style={styles.link}>Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
