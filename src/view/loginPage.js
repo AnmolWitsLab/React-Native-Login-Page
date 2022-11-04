@@ -6,40 +6,76 @@ import {
   Button,
   TouchableOpacity,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../context/authContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginPage = ({navigation}) => {
-  const getDataUsingGet = () => {
-    fetch('https://reqres.in/api/users?page=2', {
-      method: 'GET',
-    })
-      .then(response => response.json())
-      .then(responseJson => {
-        console.log(responseJson);
-      })
-      .catch(error => {
-        alert(JSON.stringify(error));
-        console.error(error);
-      });
+  const readData = async ({navigation}) => {
+    console.log('navigation', navigation);
+    try {
+      const value = await AsyncStorage.getItem('token');
+      console.log('value in starting', value);
+      if (value === null) {
+        navigation.navigate('Login');
+        alert('User logged in');
+      } else {
+        navigation.navigate('Home');
+        alert('User not logged in');
+      }
+    } catch (e) {
+      alert('Failed to fetch the input from storage');
+    }
   };
-
-  const validEmail = new RegExp(
-    '^[a-zA-Z0-9._:$!%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]$',
-  );
-  const validPassword = new RegExp('^(?=.*?[A-Za-z])(?=.*?[0-9]).{6,}$');
-
+  useEffect(() => {
+    readData();
+  }, []);
   const handleSubmit = () => {
     if (validEmail.test(email) && validPassword.test(password)) {
-      navigation.navigate('Home');
+      const data = {
+        username: email,
+        password,
+      };
+      console.log('JSON.stringify(data)', JSON.stringify(data));
+      fetch('https://reqres.in/api/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(responseJson => {
+          console.log('responseJson', responseJson);
+          let param = responseJson.token;
+          const saveData = async () => {
+            try {
+              await AsyncStorage.setItem('token', param);
+            } catch (e) {
+              alert('Failed to save the data to the storage');
+            }
+          };
+          saveData();
+
+          navigation.navigate('Home');
+        })
+        .catch(error => {
+          alert(JSON.stringify(error));
+          console.error(error);
+        });
     } else {
       alert('Invalid Email or Password');
     }
   };
-
+  const validEmail = new RegExp(
+    '^[a-zA-Z0-9._:$!%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]$',
+  );
+  const validPassword = new RegExp('^.*(?=.{8,})(?=.*[a-zA-Z]).*$');
   const val = useContext(AuthContext);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(null);
+  const [email, setEmail] = useState('anmol');
+  const [password, setPassword] = useState();
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.wrapper}>
@@ -65,7 +101,6 @@ const LoginPage = ({navigation}) => {
         <Button
           title="Login"
           onPress={() => {
-            getDataUsingGet();
             handleSubmit();
           }}
         />
