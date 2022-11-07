@@ -11,22 +11,17 @@ const HomePage = ({navigation}) => {
   const readData = async () => {
     try {
       const value = await AsyncStorage.getItem('token');
-      if (value !== null) {
+      if (value) {
         setInput(value);
       }
-    } catch (e) {
-      alert('Failed to fetch the input from storage');
+    } catch (err) {
+      console.log('err', err);
     }
   };
-  const clearStorage = async () => {
-    try {
-      await AsyncStorage.clear();
-      const value = await AsyncStorage.getItem('token');
-      console.log('value', value);
-      navigation.navigate('Login');
-    } catch (e) {
-      alert('Failed to clear the async storage.');
-    }
+  const clearStorage = () => {
+    AsyncStorage.removeItem('token');
+
+    navigation.navigate('Login');
   };
 
   return (

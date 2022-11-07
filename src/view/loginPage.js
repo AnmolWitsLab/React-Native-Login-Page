@@ -5,31 +5,33 @@ import {
   TextInput,
   Button,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../context/authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginPage = ({navigation}) => {
-  const readData = async ({navigation}) => {
-    console.log('navigation', navigation);
-    try {
-      const value = await AsyncStorage.getItem('token');
-      console.log('value in starting', value);
-      if (value === null) {
-        navigation.navigate('Login');
-        alert('User logged in');
-      } else {
-        navigation.navigate('Home');
-        alert('User not logged in');
-      }
-    } catch (e) {
-      alert('Failed to fetch the input from storage');
-    }
-  };
+  const [token, setToken] = useState();
   useEffect(() => {
     readData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  const readData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('token');
+      console.log('value', value);
+      if (value) {
+        navigation.navigate('Home');
+        setToken(value);
+      } else {
+        navigation.navigate('Login');
+      }
+    } catch (err) {
+      console.log('err', err);
+    }
+  };
   const handleSubmit = () => {
     if (validEmail.test(email) && validPassword.test(password)) {
       const data = {
@@ -46,26 +48,16 @@ const LoginPage = ({navigation}) => {
         },
       })
         .then(response => response.json())
-        .then(responseJson => {
+        .then(async responseJson => {
           console.log('responseJson', responseJson);
-          let param = responseJson.token;
-          const saveData = async () => {
-            try {
-              await AsyncStorage.setItem('token', param);
-            } catch (e) {
-              alert('Failed to save the data to the storage');
-            }
-          };
-          saveData();
-
-          navigation.navigate('Home');
+          await AsyncStorage.setItem('token', responseJson.token);
+          setToken(responseJson, token);
         })
         .catch(error => {
-          alert(JSON.stringify(error));
           console.error(error);
         });
     } else {
-      alert('Invalid Email or Password');
+      Alert.alert('invalid');
     }
   };
   const validEmail = new RegExp(
@@ -73,7 +65,7 @@ const LoginPage = ({navigation}) => {
   );
   const validPassword = new RegExp('^.*(?=.{8,})(?=.*[a-zA-Z]).*$');
   const val = useContext(AuthContext);
-  const [email, setEmail] = useState('anmol');
+  const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
   return (

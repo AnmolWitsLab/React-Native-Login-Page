@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   TextInput,
@@ -7,14 +7,12 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
-import {AuthContext} from '../context/authContext';
 
 const RegisterPage = ({navigation}) => {
   const [userName, setUserName] = useState(null);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState(null);
-  const val = useContext(AuthContext);
 
   const validUsername = new RegExp(
     '^^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$',
@@ -43,7 +41,7 @@ const RegisterPage = ({navigation}) => {
   return (
     <View style={styles.mainContainer}>
       <View style={styles.wrapper}>
-        <Text>{val}</Text>
+        <Text>Login</Text>
 
         <TextInput
           style={styles.input}
